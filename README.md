@@ -4,9 +4,7 @@ Turn any YouTube link into a news-style clipping note in Obsidian: the full tran
 
 ## Demo
 
-<video src="https://github.com/gospel2us-spec/youtube-clipping/raw/main/docs/demo.mp4" controls muted width="100%"></video>
 
-[▶ Watch the demo video](docs/demo.mp4)
 
 ## Features
 
