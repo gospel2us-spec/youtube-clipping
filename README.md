@@ -1,4 +1,4 @@
-# Youtube Clipping
+# YouTube Clipping
 
 Turn any YouTube link into a news-style clipping note in Obsidian: the full transcript, a category, an AI summary and key points with timestamp links, powered by Google Gemini.
 
@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/07738d2b-79af-4bd2-9bea-388f60d19b3a
 - 🗂️ **Automatic classification** into categories you define (default: Politics, Economy, Society, World, IT·Science, Medicine·Health, Culture·Life, Education, Other).
 - 📰 **News-style clipping**: a headline written in the same language as the video title, a short lead, 5–10 key points, keywords and the people/organizations mentioned.
 - ⏱️ **Timestamp links**: key points and every transcript paragraph jump to that exact moment in the video.
-- 🌐 **One-click translation** of the original transcript into another language with the **Script Translation** button inside the note.
+- 🌐 **One-click translation** of the original transcript into another language with the **Script translation** button inside the note.
 - 📝 **Ready-to-use notes**: properties (title, source, channel, category, tags, duration), thumbnail and a collapsible transcript, saved into per-category folders.
 - 🔁 **Resilient**: temporary Gemini overload (503) is retried automatically, with an optional fallback model.
 - 📋 **Copyable errors**: error messages stay on screen with **Copy** and **Close** buttons.
@@ -29,14 +29,14 @@ https://github.com/user-attachments/assets/07738d2b-79af-4bd2-9bea-388f60d19b3a
 
 1. Open Obsidian **Settings**.
 2. Go to **Community plugins** and turn off Restricted mode.
-3. Click **Browse** and search for "Youtube Clipping".
+3. Click **Browse** and search for "YouTube Clipping".
 4. Click **Install**, then **Enable**.
 
 ### Manual installation
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/gospel2us-spec/youtube-clipping/releases/latest).
 2. Copy them into `<your vault>/.obsidian/plugins/youtube-clipping/`.
-3. Reload Obsidian and enable **Youtube Clipping** under Community plugins.
+3. Reload Obsidian and enable **YouTube Clipping** under Community plugins.
 
 ### Beta testing with BRAT
 
@@ -52,7 +52,7 @@ Install the BRAT plugin, choose **Add beta plugin** and enter `https://github.co
 
 ### Initial setup
 
-1. Open **Settings → Youtube Clipping**.
+1. Open **Settings → YouTube Clipping**.
 2. Paste your **Gemini API key**.
 3. (Optional) Adjust the model, save folder and category list.
 
@@ -88,17 +88,17 @@ That's it — the plugin is ready to create clippings.
 1. Copy a YouTube URL.
 2. Run **Clip the YouTube link in the clipboard** from the command palette — no dialog needed.
 
-### Method 3: Script Translation button
+### Method 3: Script translation button
 
-Every clipping contains a **Script Translation** button right below the original transcript.
+Every clipping contains a **Script translation** button right below the original transcript.
 
 1. Choose the target language: Korean, English, Japanese, Chinese (Simplified), Spanish, French or German.
-2. Click **Script Translation**.
+2. Click **Script translation**.
 3. A new section **Translated script (language)** is added at the bottom of the note. The original transcript and the timestamp links are kept.
 
 Running the same language again replaces that section; other languages are added as separate sections. For notes created elsewhere, run the command **Add / move the translation box below the original script**.
 
-<!-- SCREENSHOT (optional): Script Translation button -->
+<!-- SCREENSHOT (optional): Script translation button -->
 
 ## Output Format
 
@@ -125,7 +125,7 @@ type: youtube-clip
 ## People & organizations
 ## Full script
 > [!note]- Script (collapsible, 30-second paragraphs with timestamp links)
-[ Language selector ]  [ Script Translation ]
+[ Language selector ]  [ Script translation ]
 ## Translated script (language)   (added by the button)
 ````
 
@@ -135,7 +135,7 @@ The headline is written in the **same language as the video title**. The summary
 
 ## How it works, network use and privacy
 
-The plugin only connects to the internet when you create a clipping or press **Script Translation**. It has no telemetry and no ads.
+The plugin only connects to the internet when you create a clipping or press **Script translation**. It has no telemetry and no ads.
 
 | Service | Purpose | What is sent |
 |---|---|---|

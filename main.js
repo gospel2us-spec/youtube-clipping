@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Youtube Clipping
+ * YouTube Clipping
  *
  * 유튜브 주소 → 전체 스크립트(자막) 수집 → Gemini로 뉴스 클리핑처럼 분류·요약 → 볼트에 노트로 저장.
  * 자막은 유튜브 InnerTube(ANDROID 클라이언트)로 가져오고, 실패하면 영상 페이지에서 가져온다.
@@ -530,7 +530,7 @@ class YoutubeClippingPlugin extends Plugin {
   async onload() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-    this.addRibbonIcon("newspaper", "Youtube Clipping", () => this.openModal());
+    this.addRibbonIcon("newspaper", "YouTube Clipping", () => this.openModal());
     this.addCommand({ id: "clip-youtube", name: "Clip a YouTube link", callback: () => this.openModal() });
     this.addCommand({
       id: "clip-from-clipboard",
@@ -564,7 +564,7 @@ class YoutubeClippingPlugin extends Plugin {
         this.settings.translateTarget = select.value;
         await this.saveSettings();
       });
-      const btn = box.createEl("button", { text: "Script Translation", cls: "mod-cta" });
+      const btn = box.createEl("button", { text: "Script translation", cls: "mod-cta" });
       box.createSpan({
         cls: "ytclip-translate-desc",
         text: "To translate the original text into another language, select the language and click.",
@@ -611,7 +611,7 @@ class YoutubeClippingPlugin extends Plugin {
     const s = this.settings;
     const videoId = extractVideoId(input);
     if (!videoId) throw new Error("Not a valid YouTube link: " + input);
-    if (!s.apiKey) throw new Error("No Gemini API key. Enter it in Settings → Youtube Clipping.");
+    if (!s.apiKey) throw new Error("No Gemini API key. Enter it in Settings → YouTube Clipping.");
 
     status("Fetching video info and transcript…");
     const info = await fetchVideo(videoId, s.preferredLangs, s.scriptLanguage);
@@ -659,7 +659,7 @@ class ClipModal extends Modal {
   async onOpen() {
     const { contentEl } = this;
     contentEl.addClass("ytclip-modal");
-    contentEl.createEl("h2", { text: "Youtube Clipping" });
+    contentEl.createEl("h2", { text: "YouTube Clipping" });
     contentEl.createEl("p", { text: "Paste a YouTube link to fetch the full transcript and create a classified, summarized note." });
 
     let url = "";

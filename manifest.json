@@ -1,6 +1,6 @@
 {
   "id": "youtube-clipping",
-  "name": "Youtube Clipping",
+  "name": "YouTube Clipping",
   "version": "1.0.0",
   "minAppVersion": "1.14.5",
   "description": "Turn a YouTube link into a news-style clipping note with the full transcript, a category and an AI summary (Gemini).",
