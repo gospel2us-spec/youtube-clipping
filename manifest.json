@@ -1,0 +1,10 @@
+{
+  "id": "youtube-clipping",
+  "name": "Youtube Clipping",
+  "version": "1.0.0",
+  "minAppVersion": "1.14.5",
+  "description": "Turn a YouTube link into a news-style clipping note with the full transcript, a category and an AI summary (Gemini).",
+  "author": "gospel2us-spec",
+  "authorUrl": "https://github.com/gospel2us-spec",
+  "isDesktopOnly": false
+}
