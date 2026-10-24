@@ -4,9 +4,9 @@ Turn any YouTube link into a news-style clipping note in Obsidian: the full tran
 
 ## Demo
 
-<!-- DEMO VIDEO / GIF: insert the demo here later.
-     Example (GIF):   ![Demo](docs/demo.gif)
-     Example (video): https://github.com/user-attachments/assets/YOUR_VIDEO_ID -->
+<video src="https://github.com/gospel2us-spec/youtube-clipping/raw/main/docs/demo.mp4" controls muted width="100%"></video>
+
+[▶ Watch the demo video](docs/demo.mp4)
 
 ## Features
 
@@ -56,38 +56,35 @@ Install the BRAT plugin, choose **Add beta plugin** and enter `https://github.co
 
 That's it — the plugin is ready to create clippings.
 
-> [!NOTE]
-> The plugin interface is currently in Korean. The table below lists the Korean label of every setting next to its English meaning. An English interface is planned.
-
 ### Settings reference
 
-| Setting (English) | Label in the UI | Description | Default |
-|---|---|---|---|
-| Gemini API key | Gemini API 키 | Your Google AI Studio key. Stored in the plugin's `data.json` (plain text). | — |
-| Gemini model | Gemini 모델 | Model used for classification and summary. | `gemini-3.8-flash` |
-| Fallback model | 대체 모델 | Tried automatically if the main model keeps failing (e.g. 503 overload). Leave empty to disable. | `gemini-flash-latest` |
-| Save folder | 저장 폴더 | Where clippings are saved. | `YouTube Clipping` |
-| Category list | 분류(카테고리) 목록 | Comma-separated. The last item is used when nothing fits. | 9 categories |
-| Subfolder per category | 분류별 하위 폴더에 저장 | Save into `<folder>/<category>/`. | On |
-| Include transcript | 전체 스크립트 포함 | Add the full transcript to the note. | On |
-| Timestamp links | 스크립트에 시각 링크 넣기 | Prefix each transcript paragraph with a clickable `[mm:ss]` link. | On |
-| Transcript language | 스크립트 언어 | **Original language** of the video, or follow the priority list below. | Original |
-| Caption language priority | 자막 언어 우선순위 | Used when "follow priority list" is selected, e.g. `ko, en`. | `ko, en` |
-| Open note after saving | 저장 후 노트 열기 | Open the new note when it is ready. | On |
+| Setting | Description | Default |
+|---|---|---|
+| Gemini API key | Your Google AI Studio key. Stored in the plugin's `data.json` (plain text). | — |
+| Gemini model | Model used for classification and summary. | `gemini-3.8-flash` |
+| Fallback model | Tried automatically if the main model keeps failing (e.g. 503 overload). Leave empty to disable. | `gemini-flash-latest` |
+| Save folder | Where clippings are saved. | `YouTube Clipping` |
+| Category list | Comma-separated. The last item is used when nothing fits. | 9 categories |
+| Subfolder per category | Save into `<folder>/<category>/`. | On |
+| Include transcript | Add the full transcript to the note. | On |
+| Timestamp links | Prefix each transcript paragraph with a clickable `[mm:ss]` link. | On |
+| Transcript language | **Original language** of the video, or follow the priority list below. | Original |
+| Caption language priority | Used when "follow priority list" is selected, e.g. `ko, en`. | `ko, en` |
+| Open note after saving | Open the new note when it is ready. | On |
 
 ## Usage
 
 ### Method 1: Ribbon icon / Command palette
 
 1. Copy a YouTube URL.
-2. Click the **newspaper icon** in the left ribbon, or open the command palette (`Ctrl/Cmd + P`) and run **Clip a YouTube link** (유튜브 주소로 클리핑 만들기).
-3. The URL is filled in from your clipboard. Click **Create clipping** (클리핑 만들기).
+2. Click the **newspaper icon** in the left ribbon, or open the command palette (`Ctrl/Cmd + P`) and run **Clip a YouTube link**.
+3. The URL is filled in from your clipboard. Click **Create clipping**.
 4. The note opens when it is finished.
 
 ### Method 2: Clip straight from the clipboard
 
 1. Copy a YouTube URL.
-2. Run **Clip the YouTube link in the clipboard** (클립보드의 유튜브 주소로 바로 클리핑) from the command palette — no dialog needed.
+2. Run **Clip the YouTube link in the clipboard** from the command palette — no dialog needed.
 
 ### Method 3: Script Translation button
 
@@ -97,7 +94,7 @@ Every clipping contains a **Script Translation** button right below the original
 2. Click **Script Translation**.
 3. A new section **Translated script (language)** is added at the bottom of the note. The original transcript and the timestamp links are kept.
 
-Running the same language again replaces that section; other languages are added as separate sections. For notes created elsewhere, run the command **Add / move the translation box below the original script** (현재 노트의 번역 선택 창을 원문 스크립트 아래에 넣기/옮기기).
+Running the same language again replaces that section; other languages are added as separate sections. For notes created elsewhere, run the command **Add / move the translation box below the original script**.
 
 <!-- SCREENSHOT (optional): Script Translation button -->
 

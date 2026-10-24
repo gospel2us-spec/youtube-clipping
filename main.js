@@ -13,14 +13,14 @@ const DEFAULT_SETTINGS = {
   apiKey: "",
   model: "gemini-3.8-flash",
   folder: "YouTube Clipping",
-  categories: "정치, 경제, 사회, 국제, IT·과학, 의학·건강, 문화·생활, 교육, 기타",
+  categories: "Politics, Economy, Society, World, IT·Science, Medicine·Health, Culture·Life, Education, Other",
   subfolderByCategory: true,
   includeScript: true,
   scriptTimestamps: true,
   preferredLangs: "ko, en",
   fallbackModel: "gemini-flash-latest",
   scriptLanguage: "original", // "original" | "preferred"
-  translateTarget: "한국어",
+  translateTarget: "Korean",
   openAfter: true,
 };
 
@@ -38,17 +38,17 @@ function showError(message) {
   el.addClass("ytclip-error-notice");
   el.createDiv({ cls: "ytclip-error-text", text: String(message) });
   const row = el.createDiv({ cls: "ytclip-error-btns" });
-  const copy = row.createEl("button", { text: "복사" });
+  const copy = row.createEl("button", { text: "Copy" });
   copy.addEventListener("click", async (e) => {
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(String(message));
-      copy.setText("복사됨 ✓");
+      copy.setText("Copied ✓");
     } catch (err) {
-      copy.setText("복사 실패");
+      copy.setText("Copy failed");
     }
   });
-  row.createEl("button", { text: "닫기" }).addEventListener("click", (e) => {
+  row.createEl("button", { text: "Close" }).addEventListener("click", (e) => {
     e.stopPropagation();
     notice.hide();
   });
@@ -163,7 +163,7 @@ function pickTrack(tracks, preferred, mode, origLang) {
 }
 
 const safeName = (s) =>
-  String(s || "제목 없음").replace(/[\\/:*?"<>|#^\[\]]/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) || "제목 없음";
+  String(s || "Untitled").replace(/[\\/:*?"<>|#^\[\]]/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) || "Untitled";
 
 const yamlStr = (s) => JSON.stringify(String(s == null ? "" : s));
 
@@ -181,7 +181,7 @@ async function fetchPlayerViaInnertube(videoId) {
     }),
     throw: false,
   });
-  if (res.status !== 200) throw new Error("InnerTube 응답 " + res.status);
+  if (res.status !== 200) throw new Error("InnerTube response " + res.status);
   return res.json;
 }
 
@@ -191,9 +191,9 @@ async function fetchPlayerViaWatchPage(videoId) {
     headers: { "User-Agent": UA_WEB, "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8" },
     throw: false,
   });
-  if (res.status !== 200) throw new Error("영상 페이지 응답 " + res.status);
+  if (res.status !== 200) throw new Error("Watch page response " + res.status);
   const m = /ytInitialPlayerResponse\s*=\s*({.+?});\s*(?:var|<\/script>)/s.exec(res.text);
-  if (!m) throw new Error("영상 정보를 찾지 못했습니다");
+  if (!m) throw new Error("Could not find video info");
   return JSON.parse(m[1]);
 }
 
@@ -212,13 +212,13 @@ async function fetchVideo(videoId, preferredLangs, mode) {
       lastErr = e;
     }
   }
-  if (!player) throw lastErr || new Error("영상 정보를 가져오지 못했습니다");
+  if (!player) throw lastErr || new Error("Could not fetch video info");
 
   const vd = player.videoDetails || {};
   const mf = (player.microformat && player.microformat.playerMicroformatRenderer) || {};
   const info = {
     id: videoId,
-    title: vd.title || "YouTube 영상",
+    title: vd.title || "YouTube video",
     channel: vd.author || "",
     description: (vd.shortDescription || "").slice(0, 1500),
     lengthSec: parseInt(vd.lengthSeconds || "0", 10),
@@ -238,7 +238,7 @@ async function fetchVideo(videoId, preferredLangs, mode) {
       if (cap.status === 200) {
         info.transcript = parseCaptionXml(cap.text);
         info.transcriptLang = track.languageCode || "";
-        info.transcriptKind = track.kind === "asr" ? "자동 생성" : "수동 작성";
+        info.transcriptKind = track.kind === "asr" ? "auto-generated" : "manual";
       }
     } catch (e) {
       /* 자막 없이 진행 */
@@ -271,7 +271,7 @@ async function geminiPost(settings, label, onRetry, body) {
         url, method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), throw: false,
       });
       if (res.status === 200) return res;
-      const msg = (res.json && res.json.error && res.json.error.message) || res.text || "알 수 없음";
+      const msg = (res.json && res.json.error && res.json.error.message) || res.text || "unknown";
       const err = new Error(label + " (" + res.status + "): " + msg);
       if (!first) first = err;
       if (RETRYABLE.indexOf(res.status) === -1) {
@@ -279,10 +279,10 @@ async function geminiPost(settings, label, onRetry, body) {
         throw first;
       }
       if (attempt < waits.length) {
-        if (onRetry) onRetry(models[m] + " 응답 지연(" + res.status + "), " + waits[attempt] / 1000 + "초 후 재시도 (" + (attempt + 1) + "/" + waits.length + ")…");
+        if (onRetry) onRetry(models[m] + " is busy (" + res.status + "), retrying in " + waits[attempt] / 1000 + "s (" + (attempt + 1) + "/" + waits.length + ")…");
         await sleep(waits[attempt]);
       } else if (m + 1 < models.length) {
-        if (onRetry) onRetry("대체 모델 " + models[m + 1] + " 로 시도합니다…");
+        if (onRetry) onRetry("Trying fallback model " + models[m + 1] + "…");
       }
     }
   }
@@ -318,7 +318,7 @@ async function callGemini(settings, info, categories, onRetry) {
   const parts = [{ text: instruction }];
   if (!hasScript) parts.unshift({ fileData: { fileUri: info.url } });
 
-  const res = await geminiPost(settings, "Gemini 오류", onRetry, {
+  const res = await geminiPost(settings, "Gemini error", onRetry, {
       contents: [{ role: "user", parts }],
       systemInstruction: { parts: [{ text: system }] },
       generationConfig: {
@@ -342,12 +342,12 @@ async function callGemini(settings, info, categories, onRetry) {
 
   const cand = res.json && res.json.candidates && res.json.candidates[0];
   const text = cand && cand.content && cand.content.parts && cand.content.parts.map((p) => p.text || "").join("");
-  if (!text) throw new Error("Gemini가 빈 응답을 돌려줬습니다 (" + ((cand && cand.finishReason) || "원인 불명") + ")");
+  if (!text) throw new Error("Gemini returned an empty response (" + ((cand && cand.finishReason) || "unknown reason") + ")");
   let data;
   try {
     data = JSON.parse(text);
   } catch (e) {
-    throw new Error("Gemini 응답을 해석하지 못했습니다: " + text.slice(0, 300));
+    throw new Error("Could not parse the Gemini response: " + text.slice(0, 300));
   }
   return data;
 }
@@ -357,8 +357,8 @@ async function callGemini(settings, info, categories, onRetry) {
 /* ------------------------------------------------------------------ */
 const TRANSLATE_LANG_ID = "youtube-clipping-translate";
 const TRANSLATE_BLOCK = "```" + TRANSLATE_LANG_ID + "\n```";
-const TARGET_LANGS = ["한국어", "English", "日本語", "中文(简体)", "Español", "Français", "Deutsch"];
-const SCRIPT_HEADING = "## 전체 스크립트";
+const TARGET_LANGS = ["Korean", "English", "Japanese", "Chinese (Simplified)", "Spanish", "French", "German"];
+const SCRIPT_HEADING = "## Full script";
 const TRANSLATE_BLOCK_RE = /\n*```youtube-clipping-translate\n```\n*/g;
 
 /** 번역 선택 블록을 원문 스크립트 callout 바로 아래(번역 섹션들 앞)에 둔다. 이미 있으면 그 위치로 옮긴다. */
@@ -416,7 +416,7 @@ async function translateParagraphs(settings, paras, target, onProgress, onRetry)
       "규칙: 단락 수와 순서를 그대로 유지하고, 요약하거나 빼거나 덧붙이지 마세요. 고유명사는 원어를 병기하지 않아도 됩니다. " +
       "이미 " + target + "(이)면 그대로 두세요. 번역문만 담은 JSON 문자열 배열로 답하세요.\n\n" +
       idx.map((i, k) => "[" + (k + 1) + "] " + paras[i].text).join("\n\n");
-    const res = await geminiPost(settings, "Gemini 번역 오류", onRetry, {
+    const res = await geminiPost(settings, "Gemini translation error", onRetry, {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
@@ -428,9 +428,9 @@ async function translateParagraphs(settings, paras, target, onProgress, onRetry)
     const cand = res.json && res.json.candidates && res.json.candidates[0];
     const text = cand && cand.content && cand.content.parts && cand.content.parts.map((p) => p.text || "").join("");
     let arr;
-    try { arr = JSON.parse(text); } catch (e) { throw new Error("번역 응답을 해석하지 못했습니다: " + String(text).slice(0, 200)); }
+    try { arr = JSON.parse(text); } catch (e) { throw new Error("Could not parse the translation response: " + String(text).slice(0, 200)); }
     if (!Array.isArray(arr) || arr.length !== idx.length)
-      throw new Error("번역 결과의 단락 수가 맞지 않습니다 (" + (Array.isArray(arr) ? arr.length : "?") + "/" + idx.length + "). 다시 시도하세요.");
+      throw new Error("The translation returned the wrong number of paragraphs (" + (Array.isArray(arr) ? arr.length : "?") + "/" + idx.length + "). Please try again.");
     idx.forEach((i, k) => (out[i] = String(arr[k]).trim()));
   }
   return out;
@@ -438,8 +438,8 @@ async function translateParagraphs(settings, paras, target, onProgress, onRetry)
 
 /** 번역 스크립트 섹션 마크다운 */
 function buildTranslationSection(paras, translated, target) {
-  let md = "## 번역 스크립트 (" + target + ")\n\n";
-  md += "> [!note]- 번역 펼치기 (" + target + ", AI 번역, " + paras.length + "단락)\n";
+  let md = "## Translated script (" + target + ")\n\n";
+  md += "> [!note]- Show translation (" + target + ", AI translation, " + paras.length + " paragraphs)\n";
   paras.forEach((p, i) => {
     md += "> " + (p.stamp ? p.stamp + " " : "") + translated[i] + "\n>\n";
   });
@@ -448,7 +448,7 @@ function buildTranslationSection(paras, translated, target) {
 
 /** 같은 언어의 번역 섹션이 있으면 바꾸고, 없으면 노트 끝에 붙인다 */
 function upsertTranslation(md, section, target) {
-  const heading = "## 번역 스크립트 (" + target + ")";
+  const heading = "## Translated script (" + target + ")";
   const at = md.indexOf("\n" + heading + "\n");
   if (at === -1) return md.replace(/\s*$/, "\n\n") + section;
   const rest = md.slice(at + 1 + heading.length);
@@ -473,7 +473,7 @@ function buildNote(info, ai, category, settings) {
     "clipped: " + new Date().toISOString().slice(0, 10),
     "category: " + yamlStr(category),
     "duration: " + yamlStr(info.lengthSec ? fmtTime(info.lengthSec) : ""),
-    "tags: [" + ["유튜브클리핑", ...tags].map(yamlStr).join(", ") + "]",
+    "tags: [" + ["youtube-clipping", ...tags].map(yamlStr).join(", ") + "]",
     "script_lang: " + yamlStr(info.transcriptLang || ""),
     "type: youtube-clip",
     "---",
@@ -483,12 +483,12 @@ function buildNote(info, ai, category, settings) {
   let md = fm;
   md += "# " + (ai.headline || info.title) + "\n\n";
   md += "![](https://img.youtube.com/vi/" + info.id + "/hqdefault.jpg)\n\n";
-  md += "> [!info] " + category + " · " + (info.channel || "채널 미상") + (info.published ? " · " + info.published : "") + "\n";
-  md += "> 원본: [" + info.title.replace(/[\[\]]/g, "") + "](" + info.url + ")\n\n";
-  md += "## 요약\n\n" + (ai.lead || "").trim() + "\n\n";
+  md += "> [!info] " + category + " · " + (info.channel || "Unknown channel") + (info.published ? " · " + info.published : "") + "\n";
+  md += "> Source: [" + info.title.replace(/[\[\]]/g, "") + "](" + info.url + ")\n\n";
+  md += "## Summary\n\n" + (ai.lead || "").trim() + "\n\n";
 
   if (ai.key_points && ai.key_points.length) {
-    md += "## 핵심 포인트\n\n";
+    md += "## Key points\n\n";
     for (const p of ai.key_points) {
       // [mm:ss] 또는 [h:mm:ss]를 영상 시각 링크로 바꾼다
       const linked = String(p).replace(/\[(\d{1,2}:)?(\d{1,2}):(\d{2})\]/g, (_m, h, mm, ss) => {
@@ -501,14 +501,14 @@ function buildNote(info, ai, category, settings) {
   }
 
   if (ai.people_orgs && ai.people_orgs.length) {
-    md += "## 등장 인물·기관\n\n" + ai.people_orgs.map((s) => "- " + s).join("\n") + "\n\n";
+    md += "## People & organizations\n\n" + ai.people_orgs.map((s) => "- " + s).join("\n") + "\n\n";
   }
 
   if (settings.includeScript) {
     if (info.transcript.length) {
       const groups = groupSegments(info.transcript, 30);
-      md += "## 전체 스크립트\n\n";
-      md += "> [!note]- 스크립트 펼치기 (" + info.transcriptLang + ", " + info.transcriptKind + ", " + groups.length + "단락)\n";
+      md += "## Full script\n\n";
+      md += "> [!note]- Show script (" + info.transcriptLang + ", " + info.transcriptKind + ", " + groups.length + " paragraphs)\n";
       for (const g of groups) {
         const stamp = settings.scriptTimestamps
           ? "[" + fmtTime(g.t) + "](" + info.url + "&t=" + Math.floor(g.t) + "s) "
@@ -517,7 +517,7 @@ function buildNote(info, ai, category, settings) {
       }
       md += "\n" + TRANSLATE_BLOCK + "\n\n";
     } else {
-      md += "## 전체 스크립트\n\n자막을 찾을 수 없어 영상 내용을 AI가 직접 분석했습니다. 스크립트는 없습니다.\n\n";
+      md += "## Full script\n\nNo captions were found, so the AI analyzed the video directly. There is no transcript.\n\n";
     }
   }
   return md;
@@ -531,26 +531,26 @@ class YoutubeClippingPlugin extends Plugin {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
     this.addRibbonIcon("newspaper", "Youtube Clipping", () => this.openModal());
-    this.addCommand({ id: "clip-youtube", name: "유튜브 주소로 클리핑 만들기", callback: () => this.openModal() });
+    this.addCommand({ id: "clip-youtube", name: "Clip a YouTube link", callback: () => this.openModal() });
     this.addCommand({
       id: "clip-from-clipboard",
-      name: "클립보드의 유튜브 주소로 바로 클리핑",
+      name: "Clip the YouTube link in the clipboard",
       callback: async () => {
         let text = "";
         try { text = await navigator.clipboard.readText(); } catch (e) { /* 무시 */ }
         const id = extractVideoId(text);
-        if (!id) return showError("클립보드에 유튜브 주소가 없습니다.");
+        if (!id) return showError("There is no YouTube link in the clipboard.");
         await this.clip(text);
       },
     });
     this.addCommand({
       id: "add-translate-button",
-      name: "현재 노트의 번역 선택 창을 원문 스크립트 아래에 넣기/옮기기",
+      name: "Add / move the translation box below the original script",
       editorCallback: (editor) => {
         const placed = placeTranslateBlock(editor.getValue());
-        if (!placed) return showError("'## 전체 스크립트' 섹션이 있는 클리핑 노트에서 실행하세요.");
+        if (!placed) return showError("Run this in a clipping note that has a '## Full script' section.");
         editor.setValue(placed);
-        new Notice("번역 선택 창을 원문 스크립트 아래에 두었습니다.");
+        new Notice("The translation box is now below the original script.");
       },
     });
 
@@ -559,7 +559,7 @@ class YoutubeClippingPlugin extends Plugin {
       const box = el.createDiv({ cls: "ytclip-translate" });
       const select = box.createEl("select");
       for (const l of TARGET_LANGS) select.createEl("option", { text: l, value: l });
-      select.value = this.settings.translateTarget || "한국어";
+      select.value = (TARGET_LANGS.includes(this.settings.translateTarget) ? this.settings.translateTarget : "Korean");
       select.addEventListener("change", async () => {
         this.settings.translateTarget = select.value;
         await this.saveSettings();
@@ -575,11 +575,11 @@ class YoutubeClippingPlugin extends Plugin {
         btn.disabled = true;
         try {
           await this.translateNote(ctx.sourcePath, select.value, (m) => status.setText(m));
-          status.setText("완료: 노트 아래쪽에 '번역 스크립트 (" + select.value + ")'가 추가되었습니다.");
+          status.setText("Done: a translated script section (" + select.value + ") was added at the bottom of the note.");
         } catch (e) {
           console.error("[youtube-clipping]", e);
-          status.setText("실패");
-          showError("번역 실패: " + (e && e.message ? e.message : e));
+          status.setText("Failed");
+          showError("Translation failed: " + (e && e.message ? e.message : e));
         } finally {
           btn.disabled = false;
         }
@@ -591,13 +591,13 @@ class YoutubeClippingPlugin extends Plugin {
 
   async translateNote(path, target, onStatus) {
     const s = this.settings;
-    if (!s.apiKey) throw new Error("Gemini API 키가 없습니다. 설정에서 입력하세요.");
+    if (!s.apiKey) throw new Error("No Gemini API key. Enter it in the plugin settings.");
     const file = this.app.vault.getAbstractFileByPath(path);
-    if (!(file instanceof TFile)) throw new Error("노트를 찾을 수 없습니다: " + path);
+    if (!(file instanceof TFile)) throw new Error("Note not found: " + path);
     const md = await this.app.vault.read(file);
     const paras = extractScript(md);
-    if (!paras) throw new Error("이 노트에서 원문 스크립트를 찾지 못했습니다.");
-    const translated = await translateParagraphs(s, paras, target, (i, n) => onStatus("번역 중… " + i + " / " + n), onStatus);
+    if (!paras) throw new Error("Could not find the original script in this note.");
+    const translated = await translateParagraphs(s, paras, target, (i, n) => onStatus("Translating… " + i + " / " + n), onStatus);
     const section = buildTranslationSection(paras, translated, target);
     await this.app.vault.process(file, (cur) => upsertTranslation(cur, section, target));
   }
@@ -610,22 +610,22 @@ class YoutubeClippingPlugin extends Plugin {
     const status = onStatus || (() => {});
     const s = this.settings;
     const videoId = extractVideoId(input);
-    if (!videoId) throw new Error("유튜브 주소를 알아볼 수 없습니다: " + input);
-    if (!s.apiKey) throw new Error("Gemini API 키가 없습니다. 설정 → Youtube Clipping에서 입력하세요.");
+    if (!videoId) throw new Error("Not a valid YouTube link: " + input);
+    if (!s.apiKey) throw new Error("No Gemini API key. Enter it in Settings → Youtube Clipping.");
 
-    status("영상 정보와 스크립트를 가져오는 중…");
+    status("Fetching video info and transcript…");
     const info = await fetchVideo(videoId, s.preferredLangs, s.scriptLanguage);
     status(
       info.transcript.length
-        ? "스크립트 " + info.transcript.length + "줄 확보 (" + info.transcriptLang + "). Gemini로 분류·요약 중…"
-        : "자막이 없어 영상을 Gemini가 직접 분석합니다…"
+        ? "Got " + info.transcript.length + " transcript lines (" + info.transcriptLang + "). Classifying and summarizing with Gemini…"
+        : "No captions found. Gemini will analyze the video directly…"
     );
 
     const categories = s.categories.split(",").map((c) => c.trim()).filter(Boolean);
     const ai = await callGemini(s, info, categories, status);
-    const category = categories.includes(ai.category) ? ai.category : categories[categories.length - 1] || "기타";
+    const category = categories.includes(ai.category) ? ai.category : categories[categories.length - 1] || "Other";
 
-    status("노트 저장 중…");
+    status("Saving note…");
     const md = buildNote(info, ai, category, s);
     const dir = normalizePath(s.folder + (s.subfolderByCategory ? "/" + category : ""));
     await this.ensureFolder(dir);
@@ -635,7 +635,7 @@ class YoutubeClippingPlugin extends Plugin {
     while (this.app.vault.getAbstractFileByPath(path)) path = normalizePath(dir + "/" + base + " (" + ++n + ").md");
     const file = await this.app.vault.create(path, md);
     if (s.openAfter) await this.app.workspace.getLeaf(false).openFile(file);
-    new Notice("클리핑 저장: " + file.path, 6000);
+    new Notice("Clipping saved: " + file.path, 6000);
     return file;
   }
 
@@ -660,11 +660,11 @@ class ClipModal extends Modal {
     const { contentEl } = this;
     contentEl.addClass("ytclip-modal");
     contentEl.createEl("h2", { text: "Youtube Clipping" });
-    contentEl.createEl("p", { text: "유튜브 주소를 넣으면 전체 스크립트를 가져와 분류·요약한 노트를 만듭니다." });
+    contentEl.createEl("p", { text: "Paste a YouTube link to fetch the full transcript and create a classified, summarized note." });
 
     let url = "";
     let input;
-    new Setting(contentEl).setName("유튜브 주소").addText((t) => {
+    new Setting(contentEl).setName("YouTube link").addText((t) => {
       input = t;
       t.setPlaceholder("https://www.youtube.com/watch?v=…").onChange((v) => (url = v));
       t.inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
@@ -677,20 +677,20 @@ class ClipModal extends Modal {
     const statusEl = contentEl.createDiv({ cls: "ytclip-status" });
     const run = async () => {
       if (this.busy) return;
-      if (!extractVideoId(url)) { statusEl.setText("유튜브 주소를 알아볼 수 없습니다."); return; }
+      if (!extractVideoId(url)) { statusEl.setText("Not a valid YouTube link."); return; }
       this.busy = true;
       try {
         await this.plugin.clip(url, (m) => statusEl.setText(m));
         this.close();
       } catch (e) {
         console.error("[youtube-clipping]", e);
-        statusEl.setText("실패");
-        showError("클리핑 실패: " + (e && e.message ? e.message : e));
+        statusEl.setText("Failed");
+        showError("Clipping failed: " + (e && e.message ? e.message : e));
       } finally {
         this.busy = false;
       }
     };
-    new Setting(contentEl).addButton((b) => b.setButtonText("클리핑 만들기").setCta().onClick(run));
+    new Setting(contentEl).addButton((b) => b.setButtonText("Create clipping").setCta().onClick(run));
     input.inputEl.focus();
   }
 
@@ -706,42 +706,42 @@ class YoutubeClippingSettingTab extends PluginSettingTab {
     const s = this.plugin.settings;
     const save = () => this.plugin.saveSettings();
 
-    new Setting(containerEl).setName("Gemini API 키").setDesc("Google AI Studio에서 받은 키. 이 볼트 폴더에만 저장됩니다.")
+    new Setting(containerEl).setName("Gemini API key").setDesc("Key from Google AI Studio. Stored only in this vault (plugin data.json, plain text).")
       .addText((t) => { t.setValue(s.apiKey).onChange(async (v) => { s.apiKey = v.trim(); await save(); }); t.inputEl.type = "password"; });
 
-    new Setting(containerEl).setName("Gemini 모델").setDesc("예: gemini-3.8-flash")
+    new Setting(containerEl).setName("Gemini model").setDesc("For example: gemini-3.8-flash")
       .addText((t) => t.setValue(s.model).onChange(async (v) => { s.model = v.trim() || DEFAULT_SETTINGS.model; await save(); }));
 
-    new Setting(containerEl).setName("대체 모델").setDesc("기본 모델이 과부하(503) 등으로 계속 실패하면 이 모델로 다시 시도합니다. 비우면 사용하지 않습니다.")
+    new Setting(containerEl).setName("Fallback model").setDesc("Tried if the main model keeps failing (e.g. 503 overload). Leave empty to disable.")
       .addText((t) => t.setValue(s.fallbackModel).onChange(async (v) => { s.fallbackModel = v.trim(); await save(); }));
 
-    new Setting(containerEl).setName("저장 폴더")
+    new Setting(containerEl).setName("Save folder")
       .addText((t) => t.setValue(s.folder).onChange(async (v) => { s.folder = v.trim() || DEFAULT_SETTINGS.folder; await save(); }));
 
-    new Setting(containerEl).setName("분류(카테고리) 목록").setDesc("쉼표로 구분. 마지막 항목은 어디에도 안 맞을 때 쓰입니다.")
+    new Setting(containerEl).setName("Category list").setDesc("Comma-separated. The last item is used when nothing else fits.")
       .addTextArea((t) => t.setValue(s.categories).onChange(async (v) => { s.categories = v; await save(); }));
 
-    new Setting(containerEl).setName("분류별 하위 폴더에 저장")
+    new Setting(containerEl).setName("Subfolder per category")
       .addToggle((t) => t.setValue(s.subfolderByCategory).onChange(async (v) => { s.subfolderByCategory = v; await save(); }));
 
-    new Setting(containerEl).setName("전체 스크립트 포함")
+    new Setting(containerEl).setName("Include transcript")
       .addToggle((t) => t.setValue(s.includeScript).onChange(async (v) => { s.includeScript = v; await save(); }));
 
-    new Setting(containerEl).setName("스크립트에 시각 링크 넣기").setDesc("각 단락 앞에 누르면 그 시점으로 가는 [mm:ss] 링크를 붙입니다.")
+    new Setting(containerEl).setName("Timestamp links").setDesc("Prefix each transcript paragraph with a clickable [mm:ss] link.")
       .addToggle((t) => t.setValue(s.scriptTimestamps).onChange(async (v) => { s.scriptTimestamps = v; await save(); }));
 
-    new Setting(containerEl).setName("스크립트 언어").setDesc("원본 언어: 영상에서 실제로 말하는 언어의 자막을 씁니다. 우선순위 목록: 아래 순서를 따릅니다.")
+    new Setting(containerEl).setName("Transcript language").setDesc("Original: use the captions in the language actually spoken in the video. Priority list: follow the order below.")
       .addDropdown((d) =>
-        d.addOption("original", "원본 언어 (영어 영상은 영어, 일본어 영상은 일본어…)")
-          .addOption("preferred", "아래 언어 우선순위 따르기")
+        d.addOption("original", "Original language of the video")
+          .addOption("preferred", "Follow the language priority below")
           .setValue(s.scriptLanguage)
           .onChange(async (v) => { s.scriptLanguage = v; await save(); })
       );
 
-    new Setting(containerEl).setName("자막 언어 우선순위").setDesc("쉼표로 구분. 예: ko, en")
+    new Setting(containerEl).setName("Caption language priority").setDesc("Comma-separated, e.g. ko, en")
       .addText((t) => t.setValue(s.preferredLangs).onChange(async (v) => { s.preferredLangs = v.trim() || "ko, en"; await save(); }));
 
-    new Setting(containerEl).setName("저장 후 노트 열기")
+    new Setting(containerEl).setName("Open note after saving")
       .addToggle((t) => t.setValue(s.openAfter).onChange(async (v) => { s.openAfter = v; await save(); }));
   }
 }
