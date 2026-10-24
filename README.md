@@ -5,6 +5,10 @@ Turn any YouTube link into a news-style clipping note in Obsidian: the full tran
 ## Demo
 
 
+https://github.com/user-attachments/assets/07738d2b-79af-4bd2-9bea-388f60d19b3a
+
+
+
 
 ## Features
 
