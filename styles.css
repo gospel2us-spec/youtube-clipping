@@ -1,0 +1,12 @@
+.ytclip-modal input[type="text"] { width: 100%; }
+.ytclip-modal .ytclip-status { margin-top: 12px; color: var(--text-muted); white-space: pre-wrap; }
+
+.ytclip-error-notice { user-select: text; -webkit-user-select: text; cursor: text; max-width: 520px; }
+.ytclip-error-text { white-space: pre-wrap; word-break: break-word; user-select: text; -webkit-user-select: text; margin-bottom: 8px; }
+.ytclip-error-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+.ytclip-translate { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; }
+.ytclip-translate-status { color: var(--text-muted); font-size: var(--font-ui-small); }
+
+.ytclip-translate-desc { color: var(--text-muted); font-size: var(--font-ui-small); flex: 1 1 240px; }
+.ytclip-translate-status { flex-basis: 100%; }
